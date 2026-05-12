@@ -3,19 +3,10 @@
 
 
 # **Self-supervised Diffusion-guided Hallucination-free Thermal Infrared Image Denoising**
-<<<<<<< HEAD
-
-=======
->>>>>>> ad2c0b3163b2c943e35246daeea45fb4bc40bfd8
  Félix Hazebrouck<sup>1,2</sup>, Alexander Schock-Schmidtke<sup>1,3</sup>, Norbert Stuhrmann<sup>2</sup>, Johannes Fottner<sup>1</sup>, Michael Teutsch<sup>2</sup>  
 <small><sup>1</sup> Technical University of Munich (TUM), Germany
 <sup>2</sup> HENSOLDT, Germany, <sup>3</sup> digital workbench, Germany</small>  
 
-<<<<<<< HEAD
-=======
-TODO: kann man nur IEEE2026 schreiben oder lieber den Workshop nennen? +  ev. add link to personal GitHub like Uformer for example. official repo for paper
-
->>>>>>> ad2c0b3163b2c943e35246daeea45fb4bc40bfd8
  <br/><br/>
 
 **This is the official repository of the paper _Self-supervised Diffusion-guided Hallucination-free Thermal Infrared Image Denoising_, 2026.**  
