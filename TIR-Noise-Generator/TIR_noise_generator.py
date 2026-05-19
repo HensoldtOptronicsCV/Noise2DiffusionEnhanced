@@ -1,6 +1,7 @@
 """
 ================================================================================
-The original code, and therefore this modified version, is licensed under the MIT license, with Copyright (c) 2026 Lijing Cai.
+The original code, and therefore this modified version, is licensed under the 
+MIT license, with Copyright (c) 2026 Lijing Cai.
 
 This file contains all functions to generate torch tensors of TIR-specific
 sensor noise, adapting the model of [ L. Cai, X. Dong, K. Zhou and X. Cao, 
