@@ -159,7 +159,7 @@ This file (```./TIR-Noise-Generator/TIR_noise_generator.py```) contains all func
 ### 3.1) Environment Setup (optional, torch and numpy are sufficient)
 For running the noise generator, you only need an environment with torch and numpy (see the imports at the beginning of the script). Note that the script is GPU-compatible and that using it (with the ```device``` argument in the ```SampleNoise(...)``` function) speeds up the process. Still, running on CPU was fast enough for our application.   
 
-> **The following setup guide installs the main environment of our project, which works and fulfills the requirements of the noise generator, but has a lot of overhead with respect to this application alone.**   
+⚠️ **The following setup guide installs the main environment of our project, which works and fulfills the requirements of the noise generator, but has a lot of overhead with respect to this application alone.**   
 We recommend only adding torch and numpy to your working environment, if not already satisfied.  
 
 &nbsp;
