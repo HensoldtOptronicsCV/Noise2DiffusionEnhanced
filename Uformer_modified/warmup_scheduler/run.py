@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 import torch
 from torch.optim.lr_scheduler import StepLR, ExponentialLR
 from torch.optim.sgd import SGD

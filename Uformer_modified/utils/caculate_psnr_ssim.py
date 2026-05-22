@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 import cv2
 import numpy as np
 import torch

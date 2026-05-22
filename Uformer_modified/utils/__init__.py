@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 from .dir_utils import *
 from .dataset_utils import *
 from .image_utils import *

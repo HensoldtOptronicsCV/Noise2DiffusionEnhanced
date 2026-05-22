@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 import numpy as np
 import scipy.io as sio
 import os

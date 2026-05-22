@@ -1,3 +1,8 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
+
 import os
 import torch
 class Options():

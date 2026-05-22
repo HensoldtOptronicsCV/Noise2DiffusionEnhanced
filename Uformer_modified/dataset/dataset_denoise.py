@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 """
 ================================================================================
 This script is modified from the original repo to reroute the code towards local

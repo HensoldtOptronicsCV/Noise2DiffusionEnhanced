@@ -1,3 +1,7 @@
+'''
+Copyright (c) 2022 Zhendong Wang
+'''
+
 import torch
 import torch.nn.parallel
 import numpy as np
