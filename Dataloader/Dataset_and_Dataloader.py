@@ -1,22 +1,47 @@
 """
 ================================================================================
 This file contains everything to load and store image-batches:
-TODO: compöete that chit -> ask claude or chatgpt to do it
     - the dataset-class SingleTIRDataset(Dataset) for loading a batch of images 
-from a folder with the associated names.
-    - a dataloader wrapper function GetDataLoader(...)
-    - a custom normalization tranformation (class NormalizeTensor) that can be 
-called on each image when creating an instance of SingleTIRDataset
-    - 2 custom cropping functions (class RandomCrop and fcn random_crop_batch) 
-that crop either images or batches.
->>>> ATTENTION: the class is designed to be passed as arg at Dataset-initialization 
--> must know the croping-H&W, as it must be the same for all elements of a batch 
-and batches are formed only in the Dataloader -> output-size must be same for all images
-           the function is designed to crop randomly image batches -> to be used 
-during training after getting the current batch from dataloader (because there: 
-know the batch -> can ensure all images in it have same size) <<<<
+from a folder with the associated names. Returns (image, name).
+    - the dataset-class PairedTIRDataset(Dataset) for loading paired HQ/LQ image 
+batches from two folders. Both folders must contain identically named files. 
+Returns (hq_image, lq_image, name).
+    - the dataset-class TripleTIRDataset(Dataset) for loading HQ/LQ image pairs 
+with an optional GT (ground truth) folder. If no GT folder is given, None is 
+returned in its place. Returns (hq_image, lq_image, gt_image, name).
+    - a dataloader wrapper function GetDataLoader(...) creating a DataLoader 
+instance from a given dataset, with configurable batch size, shuffling, and 
+optional custom collation.
+    - a custom collate function triple_collate_fn(...) to handle None GT values 
+in TripleTIRDataset batches: stacks HQ/LQ tensors normally, returns None for 
+GT batch if no GT images are present.
+    - a custom normalization transformation (class NormalizeTensor) that 
+normalizes a float tensor by a given max_value (e.g. 255 or 16383 for 14-bit), 
+instead of relying on dtype-based rescaling. To be passed at 
+Dataset-initialization.
+    - a fixed-position cropping transform (class RandomCrop) that crops to a 
+fixed H×W at a uniformly sampled random position. To be passed at 
+Dataset-initialization. The fixed H×W ensures same tensor shapes needed for 
+later stacking into a batch in the Dataloader class.
+    - a batch cropping function random_crop_batch(...) designed to be called 
+during training after fetching a batch from the DataLoader. Crops all images 
+in a (N,C,H,W) batch to the same H×W, either at a shared random center or at 
+per-image independent centers (different_centers=True). To be passed at 
+Dataset-initialization.
+    - a fixed-position cropping transform (class CenterCrop) that crops to a 
+fixed H×W at the image center. To be passed at Dataset-initialization.
+    - a fixed-position cropping transform (class FlexibleCrop) that crops to a 
+fixed H×W at a configurable position: "center", "topleft", "topright", 
+"bottomleft", or "bottomright". To be passed at Dataset-initialization.
+    - 2 helper functions for sampling a crop size along one dimension:
+        * uniform_sample_size(...): samples uniformly in [min_fraction*dim, dim]
+        * gaussian_sample_size(...): samples from a Gaussian centered in that 
+range, clamped to it; std is chosen so that target_prob of the mass falls 
+inside. Expensive — only use when needed.
     - a function NameAndSaveImage(...) that saves an image-batch tensor as 
-singles PNG images. Supports bit depth 8 or 16.
+individual PNG images. Supports bit depths 8 or 16. Images can be named via an 
+explicit name list or auto-named with an incrementing index. Tensors are 
+normalized to [0,1] before saving.
 ================================================================================
 """
 
