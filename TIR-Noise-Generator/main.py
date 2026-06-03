@@ -7,7 +7,7 @@ images with the TIR_noise_generator and adequate folder names.
 
 
 
-from TIR_noise_generator import SampleNoise, GetNoiseSamplingParams, GetNoiseSamplingParamsLighterNoise
+from TIR_noise_generator import SampleNoise, GetNoiseSamplingParamsLighterNoise
 from Dataset_and_Dataloader  import SingleTIRDataset, GetDataLoader, NameAndSaveImage, NormalizeTensor, RandomCrop, random_crop_batch
 
 import matplotlib.pyplot as plt # for image display at end
@@ -25,7 +25,7 @@ def NoiseNamingSuffixCreationTrain(base_name:str , noise_params:dict) -> str :
     Args:
         base_name: the name before the range-values-suffix
         noise_params: the dictionnary with all noise-parameters, 
-            following the output format of GetNoiseSamplingParams()
+            following the output format of GetNoiseSamplingParamsLighterNoise()
     """
 
     string_name = "{}_G{},{}-LC{},{}-L{},{}-C{},{}-HN{},{}".format(base_name, int(noise_params['gaussian_noise_std_range'][0] *255 ), int(noise_params['gaussian_noise_std_range'][1] *255 ), int(noise_params['row_col_noise_std_range'][0] *255 ), int(noise_params['row_col_noise_std_range'][1] *255 ), int(noise_params['row_noise_std_range'][0] *255 ), int(noise_params['row_noise_std_range'][1] *255 ), int(noise_params['col_noise_std_range'][0] *255 ), int(noise_params['col_noise_std_range'][1] *255 ), int(noise_params['hill_noise_std_range'][0] *255 ), int(noise_params['hill_noise_std_range'][1] *255 ))
@@ -42,7 +42,7 @@ def NoiseNamingSuffixCreationTest(base_name:str , noise_params:dict) -> str :
     Args:
         base_name: the name before the fix-values-suffix
         noise_params: the dictionnary with all noise-parameters, 
-            following the output format of GetNoiseSamplingParams()
+            following the output format of GetNoiseSamplingParamsLighterNoise()
     """
     string_name = "{}_G{}-LC{}-L{}-C{}-HN{}".format(base_name, int(noise_params['gaussian_noise_std_value'] *255 ), int(noise_params['row_col_noise_std_value'] *255 ), int(noise_params['row_noise_std_value'] *255 ), int(noise_params['col_noise_std_value'] *255 ), int(noise_params['hill_noise_std_value'] *255 ))
     return string_name
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     """
     hq_dataset = SingleTIRDataset("path/to/folder/dataset/images", input_transform=normalization_transform)
     hq_dataloader = GetDataLoader(hq_dataset, batch_size=64, shuffle=False) # shuffle makes you see always same images or randomly chosen ones
-    # get lq_image batch
+    # get hq_image batch
     hq_image_batch, associated_name_batch = next(iter(hq_dataloader)) # access a random set of hq_images as batch (tensor of size batchsize)
 
     # sanity checks
@@ -77,7 +77,6 @@ if __name__ == "__main__":
     plt.show()
 
     # generate noise
-    #noise_params = GetNoiseSamplingParams()
     noise_params = GetNoiseSamplingParamsLighterNoise()
     N,C,H,W = hq_image_batch.size()
     noisy_images = SampleNoise(N, C, H, W, noise_params, device, mode="train") # first: just noises

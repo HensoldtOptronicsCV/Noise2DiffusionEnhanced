@@ -6,15 +6,9 @@ from a folder with the associated names. Returns (image, name).
     - the dataset-class PairedTIRDataset(Dataset) for loading paired HQ/LQ image 
 batches from two folders. Both folders must contain identically named files. 
 Returns (hq_image, lq_image, name).
-    - the dataset-class TripleTIRDataset(Dataset) for loading HQ/LQ image pairs 
-with an optional GT (ground truth) folder. If no GT folder is given, None is 
-returned in its place. Returns (hq_image, lq_image, gt_image, name).
     - a dataloader wrapper function GetDataLoader(...) creating a DataLoader 
 instance from a given dataset, with configurable batch size, shuffling, and 
 optional custom collation.
-    - a custom collate function triple_collate_fn(...) to handle None GT values 
-in TripleTIRDataset batches: stacks HQ/LQ tensors normally, returns None for 
-GT batch if no GT images are present.
     - a custom normalization transformation (class NormalizeTensor) that 
 normalizes a float tensor by a given max_value (e.g. 255 or 16383 for 14-bit), 
 instead of relying on dtype-based rescaling. To be passed at 
@@ -28,16 +22,11 @@ during training after fetching a batch from the DataLoader. Crops all images
 in a (N,C,H,W) batch to the same H×W, either at a shared random center or at 
 per-image independent centers (different_centers=True). To be passed at 
 Dataset-initialization.
-    - a fixed-position cropping transform (class CenterCrop) that crops to a 
-fixed H×W at the image center. To be passed at Dataset-initialization.
     - a fixed-position cropping transform (class FlexibleCrop) that crops to a 
 fixed H×W at a configurable position: "center", "topleft", "topright", 
 "bottomleft", or "bottomright". To be passed at Dataset-initialization.
-    - 2 helper functions for sampling a crop size along one dimension:
-        * uniform_sample_size(...): samples uniformly in [min_fraction*dim, dim]
-        * gaussian_sample_size(...): samples from a Gaussian centered in that 
-range, clamped to it; std is chosen so that target_prob of the mass falls 
-inside. Expensive — only use when needed.
+    - a helper function uniform_sample_size(...) for uniformly sampling a crop 
+size along one dimension in [min_fraction*dim, dim].
     - a function NameAndSaveImage(...) that saves an image-batch tensor as 
 individual PNG images. Supports bit depths 8 or 16. Images can be named via an 
 explicit name list or auto-named with an incrementing index. Tensors are 
@@ -54,13 +43,11 @@ from torchvision.io import decode_image, read_file
     # Dataloader
 from torch.utils.data import DataLoader
     #for saving images
-import os
 from PIL import Image
     # for crop transformation
 from statistics import NormalDist
 import random
 from torchvision.transforms.v2 import functional as F
-import numpy as np
 
 
 #=========================== DATA-AUGM. - TRANSFORMS ===========================
@@ -135,43 +122,6 @@ class RandomCrop:
         # --- Crop ---
         return F.crop(tensor, top, left, crop_h, crop_w)
 
-class CenterCrop:
-    """
-    Center cropping transform for data augmentation. 
-    (Given as arg at Dataset-initialization.)
-
-    Args:
-        crop_height (int, optional): Fixed crop height.
-        crop_width (int, optional): Fixed crop width.
-    """
-
-    def __init__(self, crop_height=512, crop_width=640):
-        self.crop_height = crop_height
-        self.crop_width = crop_width
-
-    def __call__(self, tensor: torch.Tensor):
-        """
-        Args:
-            tensor (torch.Tensor): Image tensor [C,H,W] or [H,W].
-
-        Returns:
-            Cropped tensor.
-        """
-        if tensor.ndim == 2:
-            H, W = tensor.shape
-        elif tensor.ndim == 3:
-            C, H, W = tensor.shape
-        else:
-            raise ValueError(f"Unsupported tensor shape: {tensor.shape}")
-
-        # --- Clamp to image size ---
-        crop_h = min(self.crop_height, H)
-        crop_w = min(self.crop_width, W)
-        # --- Sample crop position ---
-        top = (H - crop_h)//2 if H > crop_h else 0
-        left = (W - crop_w)//2 if W > crop_w else 0
-        # --- Crop ---
-        return F.crop(tensor, top, left, crop_h, crop_w)
 
 class FlexibleCrop:
     """
@@ -246,48 +196,6 @@ def uniform_sample_size(dim_size, fixed_size=None, min_fraction=0.25):
     sampled = random.randint(min_size, dim_size)
     return sampled
 
-def gaussian_sample_size(dim_size, fixed_size=None, min_fraction=0.25, target_prob=0.9):
-    """
-    Gaussian sample a crop size with mean = (dim_size-dim_size*min_fraction)/2.
-    The std is chosen such that P(min_fraction*dim_size <= X <= dim_size) ≈ target_prob.
-    Out-of-range samples are then clamped to [min_fraction*dim_size, dim_size].
-    This function is expensive -> only use when needed!
-
-    Args:
-        dim_size (int): Original dimension.
-        fixed_size (int, optional): If given, return this size.
-        min_fraction (float): Minimum crop size as fraction of dim_size.
-        target_prob (float): Desired probability mass inside [min_fraction*dim_size, dim_size].
-
-    Returns:
-        int: Chosen crop size.
-    """
-    if fixed_size is not None:
-        return fixed_size
-
-    mean = dim_size*min_fraction +  dim_size* (1-min_fraction) / 2 # float
-    min_size = int(min_fraction * dim_size + 0.5)
-    max_size = int(dim_size)
-
-    # solve for std numerically (binary search)
-    def coverage(std):
-        dist = NormalDist(mu=mean, sigma=std)
-        return dist.cdf(max_size) - dist.cdf(min_size)
-
-    # binary search for std
-    low, high = 1e-6, dim_size * 10
-    for _ in range(50):  # 50 iterations is plenty
-        mid = (low + high) / 2
-        if coverage(mid) < target_prob:
-            low = mid
-        else:
-            high = mid
-    std = (low + high) / 2
-
-    # sample
-    sampled = round(random.gauss(mean, std))
-    return max(min_size, min(sampled, max_size))
-
 
 def random_crop_batch(batch: torch.Tensor, crop_height=None, crop_width=None, different_centers=False):
     """
@@ -341,15 +249,6 @@ class SingleTIRDataset(Dataset):
 
     def __len__(self):
         return len(self.file_list)
-
-    '''def __getitem__(self, idx):
-        image_name = self.file_list[idx]
-        img_path = os.path.join(self.img_dir, image_name)
-        img_bytes = read_file(img_path)
-        image = decode_image(img_bytes)
-        if self.input_transform:
-            image = self.input_transform(image)
-        return image, image_name'''
 
     def __getitem__(self, idx):
         image_name = self.file_list[idx]
@@ -417,75 +316,7 @@ class PairedTIRDataset(Dataset):
             hq_image = self.input_transform(hq_image)
             lq_image = self.input_transform(lq_image)
         return hq_image, lq_image, image_name
- 
 
-
-class TripleTIRDataset(Dataset):
-    """
-    Creates a Dataset for paired-image-loading: 
-    __getitem__(...) returns 3 images and the corresponding image name, 
-    following the order: (hq, lq, gt, name) 
-    If no GT_folder is given, it returns only 3 elements, because none is not 
-    Note: the input_transform is applied to all 3 images
-    """
-    def __init__(self, hq_img_dir, lq_img_dir, GT_dir=None, input_transform=None):
-        self.hq_img_dir = hq_img_dir
-        self.lq_img_dir = lq_img_dir
-        self.gt_img_dir = GT_dir
-        # Sort for deterministic order
-        self.hq_file_list = sorted(
-            [name for name in os.listdir(self.hq_img_dir) if os.path.isfile(os.path.join(self.hq_img_dir, name)) 
-                                                            and os.path.splitext(name)[1].lower() in {'.png', '.jpg', '.jpeg', '.bmp', '.tiff'}]
-        )
-        self.lq_file_list = sorted(
-            [name for name in os.listdir(self.lq_img_dir) if os.path.isfile(os.path.join(self.lq_img_dir, name)) 
-                                                            and os.path.splitext(name)[1].lower() in {'.png', '.jpg', '.jpeg', '.bmp', '.tiff'}]
-        )
-        if self.gt_img_dir is not None:
-            self.gt_file_list = sorted(
-                [name for name in os.listdir(self.gt_img_dir) if os.path.isfile(os.path.join(self.gt_img_dir, name)) 
-                                                            and os.path.splitext(name)[1].lower() in {'.png', '.jpg', '.jpeg', '.bmp', '.tiff'}]
-            )
-        assert self.hq_file_list == self.lq_file_list , "The hq and lq folders must contain the same image names to create pairs."
-        if self.gt_img_dir is not None:
-            assert self.hq_file_list == self.gt_file_list, "The hq, lq and gt folders must contain the same image names to create triples"
-        self.input_transform = input_transform #transforms to be applied to the data when __getitem__
-
-    def __len__(self):
-        return len(self.hq_file_list) # all 3 have same length, once passed the assert
-
-    
-    def __getitem__(self, idx):
-        image_name = self.hq_file_list[idx] # same in lq_ and hq_file_list
-        hq_img_path = os.path.join(self.hq_img_dir, image_name)
-        lq_img_path = os.path.join(self.lq_img_dir, image_name)
-        # --- Load image with PIL (supports 8-bit and 16-bit) ---
-        hq_pil_img = Image.open(hq_img_path)
-        lq_pil_img = Image.open(lq_img_path)
-        # --- Convert to tensor ---
-        # --- Convert to tv_tensors.Image (internally stores tensor CxHxW) ---
-        hq_image = F.to_image(hq_pil_img)
-        lq_image = F.to_image(lq_pil_img)
-        # --- Convert to float32 in [0,1] ---
-        # scale=True rescales from dtype max (e.g. 65535 → 1.0 for 16-bit) -> do not want that
-        hq_image = F.to_dtype(hq_image, torch.float32, scale=False)
-        lq_image = F.to_dtype(lq_image, torch.float32, scale=False)
-        # --- Apply transforms if provided ---
-        if self.input_transform:
-            hq_image = self.input_transform(hq_image)
-            lq_image = self.input_transform(lq_image)
-        
-        if self.gt_img_dir is None:
-            return hq_image, lq_image, None, image_name
-        
-        # if a GT folder is given:
-        gt_img_path = os.path.join(self.gt_img_dir, image_name)
-        gt_pil_img = Image.open(gt_img_path)
-        gt_image = F.to_image(gt_pil_img)
-        gt_image = F.to_dtype(gt_image, torch.float32, scale=False)
-        if self.input_transform:
-            gt_image = self.input_transform(gt_image)
-        return hq_image, lq_image, gt_image, image_name
 
 
 
@@ -503,38 +334,9 @@ def GetDataLoader(dataset: torch.utils.data.dataset.Dataset, batch_size: int = 1
             If False and the size of dataset is not divisible by the batch size,
             then the last batch will be smaller. (default: False)
     """
-    collate_fn_argument = None if collate_fn is None else triple_collate_fn
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers, pin_memory=pin_memory, collate_fn=collate_fn_argument)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers, pin_memory=pin_memory, collate_fn=collate_fn)
     return dataloader
 
-
-def triple_collate_fn(batch):
-    """
-    Custom collate function to handle None values in gt_image position.
-    
-    Args:
-        batch: List of tuples (hq_image, lq_image, gt_image, image_name)
-    
-    Returns:
-        Tuple of (hq_batch, lq_batch, gt_batch, name_batch)
-        where gt_batch is None if all gt_images are None
-    """
-    hq_images, lq_images, gt_images, image_names = zip(*batch)
-    
-    # Stack hq and lq images normally
-    hq_batch = torch.stack(hq_images, dim=0)
-    lq_batch = torch.stack(lq_images, dim=0)
-    
-    # Handle gt_images: if all are None, return None; otherwise stack
-    if all(gt is None for gt in gt_images):
-        gt_batch = None
-    else:
-        gt_batch = torch.stack(gt_images, dim=0)
-    
-    # Keep image names as a list
-    name_batch = list(image_names)
-    
-    return hq_batch, lq_batch, gt_batch, name_batch
 
 
 

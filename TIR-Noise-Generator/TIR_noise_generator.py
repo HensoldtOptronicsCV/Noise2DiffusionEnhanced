@@ -50,17 +50,12 @@ SampleNoise(N, C, H, W, noise_params, device, mode="train") -> torch.Tensor
     In train mode, all stds are drawn uniformly from their respective ranges.
     In val/test mode, fixed values are used for reproducibility.
 
-GetNoiseSamplingParams() -> dict
-    Returns the noise-sampling parameter dictionary matching the ranges and
-    values used in the reference paper (stds expressed for [0,255] images,
-    automatically normalized to [0,1] before being returned).
-    Sets patch_size=None (centered bias field, image treated as full sensor
-    output). Change patch_size to e.g. 256 to simulate tiled/cropped inputs.
-
 GetNoiseSamplingParamsLighterNoise() -> dict
     Returns a parameter dictionary with the used stripe- and row/col-noise ranges
     (row_col: [3,8]/255, row/col: [0,5]/255), reduced with respect to the original 
     values from Cai et al. to better match visually observed TIR noise levels.
+    (stds expressed for [0,255] images, automatically normalized to [0,1] before
+      being returned).
 
         ===== Normalization utilities =====
 DivideNoiseSamplingParams255(noise_params) [in-place]

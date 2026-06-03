@@ -30,8 +30,6 @@ from glob import glob
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../TIR-Noise-Generator')))
 from TIR_noise_generator import SampleNoise, GetNoiseSamplingParamsLighterNoise
-from Dataset_and_Dataloader import NameAndSaveImage
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../UNet-Adaption')))
 # from train_8bit_denoising import scale_tensor_global, scale_tensor # if need to resize
 
 

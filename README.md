@@ -17,7 +17,7 @@
 <tr>
 
 <td align="center" height="60">
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjydBgaiy1TPR3G0LZPDffdruvfqFSfb37lA&s">
+<a href="https://openaccess.thecvf.com/content/CVPR2026W/PBVS/html/Hazebrouck_Self-supervised_Diffusion-guided_Hallucination-free_Thermal_Infrared_Image_Denoising_CVPRW_2026_paper.html">
 <img src="./README_figures/button_paper.png" height="50"/>
 </a>
 </td>
@@ -29,7 +29,7 @@
 </td>
 
 <td align="center" height="60">
-<a href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjydBgaiy1TPR3G0LZPDffdruvfqFSfb37lA&s">
+<a href="https://huggingface.co/collections/SachyGuy/diffusion-guided-hallucination-free-tir-image-denoising">
 <img src="./README_figures/button_huggingface.png" height="50"/>
 </a>
 </td>
@@ -57,10 +57,10 @@
 The *HDRT-TIR-DE dataset* is a large-scale reference thermal infrared single-image dataset designed to serve as clean reference for self-supervised training schemes.  
  In the name *HDRT-TIR-DE*, *TIR* stands for *Thermal InfraRed* and *DE* for *Diffusion-Enhanced*, while *HDRT* is the name of the dataset the HDRT-TIR-DE build upon.
 
- The dataset can be downloaded on HuggingFace [here](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjydBgaiy1TPR3G0LZPDffdruvfqFSfb37lA&s), along with the train, validation and test splits, and the fixed noisy images from the validation and test set.  
- The files and content of the dataset are further described there, as well as in the [supplementary material](todo) of our work.
+ The dataset can be downloaded [on HuggingFace](https://huggingface.co/datasets/SachyGuy/HDRT-TIR-DE), along with the train, validation and test splits, and the fixed noisy images from the validation and test set.  
+ The files and content of the dataset are further described there, as well as in the [supplementary material](https://openaccess.thecvf.com/content/CVPR2026W/PBVS/supplemental/Hazebrouck_Self-supervised_Diffusion-guided_Hallucination-free_CVPRW_2026_supplemental.pdf) of our work.
 
-As described in our [paper](todo), the dataset builds upon the thermal part of the [HDRT dataset](https://huggingface.co/datasets/jingchao-peng/HDRTDataset), introduced in [[1]](#1), which was enhanced with an image-restoration diffusion model ([StableSR](https://link.springer.com/article/10.1007/s11263-024-02168-7)) to achieve better perceptual quality than any existing real TIR dataset. Combined with the diverse scenes and high image resolution inherited from the original HDRT-TIR dataset, the HDRT-TIR-DE dataset is particularly well suited for self-supervised training of image restoration networks. The specific restoration task can be determined by the degradation model used for generating the LQ counterparts from the clean images. In our work, we placed focus on TIR sensor-noise removal.
+As described in our [paper](https://openaccess.thecvf.com/content/CVPR2026W/PBVS/html/Hazebrouck_Self-supervised_Diffusion-guided_Hallucination-free_Thermal_Infrared_Image_Denoising_CVPRW_2026_paper.html), the dataset builds upon the thermal part of the [HDRT dataset](https://huggingface.co/datasets/jingchao-peng/HDRTDataset), introduced in [[1]](#1), which was enhanced with an image-restoration diffusion model ([StableSR](https://link.springer.com/article/10.1007/s11263-024-02168-7)) to achieve better perceptual quality than any existing real TIR dataset. Combined with the diverse scenes and high image resolution inherited from the original HDRT-TIR dataset, the HDRT-TIR-DE dataset is particularly well suited for self-supervised training of image restoration networks. The specific restoration task can be determined by the degradation model used for generating the LQ counterparts from the clean images. In our work, we placed focus on TIR sensor-noise removal.
 
 This dataset should contribute to filling the current lack of clean TIR reference images, due to imperfections in real TIR imagers that inevitably introduce noise in every captured real TIR image.  
 
@@ -111,7 +111,7 @@ mamba env create -f uformer_env_no-builds.yml
 
 ### 2.2) Download Pretrained Weights
 
-Download the pretrained weights from the [Huggingface page](todo) in form of the ```model_best.pth``` file, and move it to ```./Uformer_modified/log/Uformer_B/models/model_best.pth``` (```./``` is the main folder of the repository).  
+Download the pretrained weights from the [Huggingface page](https://huggingface.co/SachyGuy/TIR-Denoising-Uformer) in form of the ```model_best.pth``` file, and move it to ```./Uformer_modified/log/Uformer_B/models/model_best.pth``` (```./``` is the main folder of the repository).  
 You can move the file to another location, the path to the weights can be set in the ```options.py``` file, the default is the path above.   
 
 ### 2.3) Run Inference or Fine-Tune the Model
@@ -233,7 +233,12 @@ Therefore, **you will probably need to adjust these parameters to match the nois
 
 If you find our work useful, please consider citing it:
 
-    @article{TODO
+    @article{hazebrouck_self-supervised_2026,
+        title = {Self-supervised Diffusion-guided Hallucination-free Thermal Infrared Image Denoising},
+        booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+        author = {Hazebrouck, Félix and Schock-Schmidtke, Alexander and Stuhrmann, Norbert and Fottner, Johannes and Teutsch, Michael},
+        year = {2026},
+        pages = {7091--7101},
     }
 
 
