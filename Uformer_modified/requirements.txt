@@ -1,0 +1,16 @@
+#torch==1.8.0		# installed latest version instead (else: conflicts)
+#torchvision==0.9.0	# installed latest version instead (else: conflicts)
+matplotlib
+scikit-image
+opencv-python
+yacs
+joblib 
+natsort 
+h5py 
+tqdm
+einops
+linformer
+timm
+ptflops
+dataclasses
+natsort
