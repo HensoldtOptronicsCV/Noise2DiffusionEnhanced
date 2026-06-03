@@ -111,7 +111,7 @@ mamba env create -f uformer_env_no-builds.yml
 
 ### 2.2) Download Pretrained Weights
 
-Download the pretrained weights from the [Huggingface page](https://huggingface.co/SachyGuy/TIR-Denoising-Uformer) in form of the ```model_best.pth``` file, and move it to ```./Uformer_modified/log/Uformer_B/models/model_best.pth``` (```./``` is the main folder of the repository).  
+Download the pretrained weights from the [Huggingface page](https://huggingface.co/SachyGuy/Noise2DiffusionEnhanced) in form of the ```model_best.pth``` file, and move it to ```./Uformer_modified/log/Uformer_B/models/model_best.pth``` (```./``` is the main folder of the repository).  
 You can move the file to another location, the path to the weights can be set in the ```options.py``` file, the default is the path above.   
 
 ### 2.3) Run Inference or Fine-Tune the Model
