@@ -67,7 +67,7 @@ This dataset should contribute to filling the current lack of clean TIR referenc
 <br/><br/>
 ## 2. *Noise2DiffusionEnhanced* Pretrained Denoising Network <a name="Noise2DiffusionEnhanced"></a> 
 
-The *Noise2DiffusionEnhanced* network is a pretrained TIR sensor-noise denoising network with [Uformer architecture](https://openaccess.thecvf.com/content/CVPR2022/html/Wang_Uformer_A_General_U-Shaped_Transformer_for_Image_Restoration_CVPR_2022_paper.html). It was trained on the [HDRT-TIR-diffusion-enhanced](https://huggingface.co/datasets/Aldunitro/HDRT-TIR-diffusion-enhanced) dataset and represents an out-of-the-box working denoising network.  
+The *Noise2DiffusionEnhanced* network is a pretrained TIR sensor-noise denoising network with [Uformer architecture](https://openaccess.thecvf.com/content/CVPR2022/html/Wang_Uformer_A_General_U-Shaped_Transformer_for_Image_Restoration_CVPR_2022_paper.html). It was trained on the [_HDRT-TIR-DE_ dataset](https://huggingface.co/datasets/SachyGuy/HDRT-TIR-DE) and represents an out-of-the-box working denoising network.  
 This pretrained model should contribute to filling the current lack of reference denoising models for TIR single-image denoising, for direct use as well as for related research.  
 
 This section provides a step-by-step installation guide for running inference and/or fine-tuning this denoising method.  
